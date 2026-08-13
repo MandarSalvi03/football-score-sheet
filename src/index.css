@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+body {
+  background-color: #f3f4f6;
+  color: #111827;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.outdoor-mode body {
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 700;
+}
