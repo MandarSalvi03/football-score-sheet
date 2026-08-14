@@ -14,6 +14,7 @@ export default function SavedMatches() {
     if (window.confirm('Are you sure you want to delete this match?')) {
       await db.matches.delete(id);
       await db.goals.where({ matchId: id }).delete();
+      await db.cards.where({ matchId: id }).delete();
       await db.sfRecords.where({ matchId: id }).delete();
       await db.signatures.where({ matchId: id }).delete();
     }

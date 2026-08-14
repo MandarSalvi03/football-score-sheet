@@ -42,6 +42,16 @@ export interface Goal {
   createdAt: string;
 }
 
+export interface Card {
+  id?: number;
+  matchId: number;
+  team: 'A' | 'B';
+  playerId: number;
+  type: 'yellow' | 'red';
+  matchTime: string;
+  createdAt: string;
+}
+
 export interface SFRecord {
   id?: number;
   matchId: number;
@@ -62,6 +72,7 @@ export class ScoreSheetDB extends Dexie {
   matches!: Table<Match, number>;
   players!: Table<Player, number>;
   goals!: Table<Goal, number>;
+  cards!: Table<Card, number>;
   sfRecords!: Table<SFRecord, number>;
   signatures!: Table<Signature, number>;
 
@@ -75,6 +86,10 @@ export class ScoreSheetDB extends Dexie {
       goals: '++id, matchId, team',
       sfRecords: '++id, matchId',
       signatures: '++id, matchId, role'
+    });
+    
+    this.version(2).stores({
+      cards: '++id, matchId, team'
     });
   }
 }

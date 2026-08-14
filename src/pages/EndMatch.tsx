@@ -15,6 +15,7 @@ export default function EndMatch() {
   const match = useLiveQuery(() => db.matches.get(matchId));
   const players = useLiveQuery(() => db.players.toArray());
   const goals = useLiveQuery(() => db.goals.where({ matchId }).sortBy('matchTime'), [matchId]);
+  const cards = useLiveQuery(() => db.cards.where({ matchId }).toArray(), [matchId]);
   const sfRecords = useLiveQuery(() => db.sfRecords.where({ matchId }).toArray(), [matchId]);
   const signatures = useLiveQuery(() => db.signatures.where({ matchId }).toArray(), [matchId]);
 
@@ -25,9 +26,13 @@ export default function EndMatch() {
   const [selectedDefenderId, setSelectedDefenderId] = useState<number | ''>('');
   const [selectedGoalkeeperId, setSelectedGoalkeeperId] = useState<number | ''>('');
 
-  if (!match || !players || !goals || !sfRecords || !signatures) return <div className="p-8">Loading...</div>;
+  if (!match || !players || !goals || !cards || !sfRecords || !signatures) return <div className="p-8">Loading...</div>;
 
   const matchPlayers = players.filter(p => p.teamId === match.teamAId || p.teamId === match.teamBId);
+
+  const events = [...goals.map(g => ({ ...g, eventType: 'goal' })), ...cards.map(c => ({ ...c, eventType: 'card' }))].sort((a, b) => 
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
 
   // If awards are not set and we haven't shown modal, open it.
   if (!match.bestDefenderId && !match.bestGoalkeeperId && !showAwardsModal) {
@@ -245,15 +250,23 @@ export default function EndMatch() {
           <div className="mb-12">
             <h3 className="bg-gray-900 text-white font-bold p-2 text-center uppercase">MATCH EVENTS (TIMELINE)</h3>
             <div className="border border-gray-900 p-4 max-h-[300px] overflow-hidden">
-               {goals.length === 0 ? <p className="text-gray-400 italic">No events recorded</p> : 
-                  goals.map((g, i) => {
-                    const p = players.find(pl => pl.id === g.playerId);
+               {events.length === 0 ? <p className="text-gray-400 italic">No events recorded</p> : 
+                  events.map((e, i) => {
+                    const p = players.find(pl => pl.id === e.playerId);
+                    const isCard = e.eventType === 'card';
+                    // @ts-ignore
+                    const cardType = isCard ? e.type : null;
                     return (
                       <div key={i} className="flex items-center space-x-4 py-1 border-b border-gray-100 text-sm">
-                        <span className="font-bold w-12">{g.matchTime}</span>
-                        <span className="font-bold text-gray-500 w-24 uppercase truncate">{g.team === 'A' ? match.teamAName : match.teamBName}</span>
+                        <span className="font-bold w-12">{e.matchTime}</span>
+                        <span className="font-bold text-gray-500 w-24 uppercase truncate">{e.team === 'A' ? match.teamAName : match.teamBName}</span>
                         <span>#{p?.number} {p?.name}</span>
-                        <span className="ml-auto text-gray-400 italic">Goal</span>
+                        <span className={cn(
+                          "ml-auto font-bold",
+                          !isCard ? "text-gray-400 italic" : cardType === 'yellow' ? "text-amber-500" : "text-red-600"
+                        )}>
+                          {!isCard ? 'Goal ⚽' : cardType === 'yellow' ? 'Yellow 🟨' : 'Red 🟥'}
+                        </span>
                       </div>
                     )
                   })
