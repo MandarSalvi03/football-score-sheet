@@ -66,7 +66,7 @@ export default function LiveMatch() {
     if (window.confirm('Are you sure you want to end this match?')) {
       setIsRunning(false);
       await db.matches.update(matchId, { status: 'finished', timer });
-      navigate(`/match/${matchId}/sf`);
+      navigate(`/match/${matchId}/signatures`);
     }
   };
 

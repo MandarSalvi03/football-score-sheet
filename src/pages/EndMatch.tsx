@@ -16,7 +16,7 @@ export default function EndMatch() {
   const players = useLiveQuery(() => db.players.toArray());
   const goals = useLiveQuery(() => db.goals.where({ matchId }).sortBy('matchTime'), [matchId]);
   const cards = useLiveQuery(() => db.cards.where({ matchId }).toArray(), [matchId]);
-  const sfRecords = useLiveQuery(() => db.sfRecords.where({ matchId }).toArray(), [matchId]);
+
   const signatures = useLiveQuery(() => db.signatures.where({ matchId }).toArray(), [matchId]);
 
   const pdfRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ export default function EndMatch() {
   const [selectedDefenderId, setSelectedDefenderId] = useState<number | ''>('');
   const [selectedGoalkeeperId, setSelectedGoalkeeperId] = useState<number | ''>('');
 
-  if (!match || !players || !goals || !cards || !sfRecords || !signatures) return <div className="p-8">Loading...</div>;
+  if (!match || !players || !goals || !cards || !signatures) return <div className="p-8">Loading...</div>;
 
   const matchPlayers = players.filter(p => p.teamId === match.teamAId || p.teamId === match.teamBId);
 
@@ -213,38 +213,7 @@ export default function EndMatch() {
             </div>
           </div>
 
-          {/* S/F */}
-          <div className="mb-12">
-            <h3 className="bg-gray-900 text-white font-bold p-2 text-center uppercase">S/F RECORDS</h3>
-            <div className="grid grid-cols-2 gap-8 border border-gray-900 p-4">
-              <div>
-                <h4 className="font-bold text-gray-500 mb-2 border-b border-gray-200">{match.teamAName}</h4>
-                {sfRecords.filter(r => r.team === 'A').length === 0 ? <p className="text-gray-400 text-sm">None</p> : 
-                  sfRecords.filter(r => r.team === 'A').map((r, i) => {
-                    const p = players.find(pl => pl.id === r.playerId);
-                    return (
-                      <div key={i} className="flex justify-between text-sm py-1 border-b border-gray-50">
-                        <span>{p?.name}</span><span className="font-bold">{r.value}</span>
-                      </div>
-                    )
-                  })
-                }
-              </div>
-              <div>
-                <h4 className="font-bold text-gray-500 mb-2 border-b border-gray-200">{match.teamBName}</h4>
-                {sfRecords.filter(r => r.team === 'B').length === 0 ? <p className="text-gray-400 text-sm">None</p> : 
-                  sfRecords.filter(r => r.team === 'B').map((r, i) => {
-                    const p = players.find(pl => pl.id === r.playerId);
-                    return (
-                      <div key={i} className="flex justify-between text-sm py-1 border-b border-gray-50">
-                        <span>{p?.name}</span><span className="font-bold">{r.value}</span>
-                      </div>
-                    )
-                  })
-                }
-              </div>
-            </div>
-          </div>
+
 
           {/* Match Events */}
           <div className="mb-12">
